@@ -10,9 +10,9 @@ namespace FileBrowser.Models
     public class FSResult
     {
         public string Name { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime LastAccessTime { get; set; }
-        public DateTime LastWriteTime { get; set; }
+        public string Created { get; set; }
+        public string LastAccessTime { get; set; }
+        public string LastWriteTime { get; set; }
     }
 
     public class FileResult : FSResult
@@ -49,9 +49,9 @@ namespace FileBrowser.Models
                 result.Current = new DirectoryResult()
                 {
                     Name = directoryInfo.Name,
-                    Created = directoryInfo.CreationTime,
-                    LastAccessTime = directoryInfo.LastAccessTime,
-                    LastWriteTime = directoryInfo.LastWriteTime
+                    Created = directoryInfo.CreationTime.ToString("G"),
+                    LastAccessTime = directoryInfo.LastAccessTime.ToString("G"),
+                    LastWriteTime = directoryInfo.LastWriteTime.ToString("G")
                 };
 
                 foreach (var directory in directoryInfo.GetDirectories())
@@ -59,9 +59,9 @@ namespace FileBrowser.Models
                     result.Directories.Add(new DirectoryResult()
                     {
                         Name = directory.Name,
-                        Created = directory.CreationTime,
-                        LastAccessTime = directory.LastAccessTime,
-                        LastWriteTime = directory.LastWriteTime
+                        Created = directory.CreationTime.ToString("G"),
+                        LastAccessTime = directory.LastAccessTime.ToString("G"),
+                        LastWriteTime = directory.LastWriteTime.ToString("G")
                     });
                 }
 
@@ -70,9 +70,9 @@ namespace FileBrowser.Models
                     result.Files.Add(new FileResult()
                     {
                         Name = file.Name,
-                        Created = file.CreationTime,
-                        LastAccessTime = file.LastAccessTime,
-                        LastWriteTime = file.LastWriteTime,
+                        Created = file.CreationTime.ToString("G"),
+                        LastAccessTime = file.LastAccessTime.ToString("G"),
+                        LastWriteTime = file.LastWriteTime.ToString("G"),
                         Length = file.Length
                     });
                 }

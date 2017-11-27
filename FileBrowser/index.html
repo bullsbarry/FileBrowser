@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>File Browser</title>
+    <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+    <script type="text/javascript" src="js/knockout-3.4.2.js"></script>
+</head>
+<body>
+    <h2 data-bind="text: currentDirectory().Name"></h2>
+    <table>
+        <thead>
+            <tr>
+                <td></td>
+                <td>Name</td>
+                <td>Created</td>
+                <td>Modified</td>
+                <td>Size</td>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: fsEntries">
+            <tr>
+                <td></td>
+                <td data-bind="text: Name"></td>
+                <td data-bind="text: Created"></td>
+                <td data-bind="text: LastWriteTime"></td>
+                <td data-bind="text: Length"></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <script>
+        var service = 'http://localhost:59360/api/v1/';
+
+        var FileBrowserModel = function (directoryInfo) {
+            var self = this;
+            self.currentDirectory = ko.observable({ Name : "" });
+            self.fsEntries = ko.observableArray();
+
+            self.loadFileList = function (path) {
+                $.getJSON(service + 'files/' + path, function (data) {
+                    console.log(data);
+                    self.currentDirectory(data.Current);
+
+                    data.Directories.forEach(function (directory) {
+                        self.fsEntries().push({ Name : directory.Name, Created : directory.Created, LastWriteTime : directory.LastWriteTime, Length : ''});
+                    });
+
+                    data.Files.forEach(function (file) {
+                        self.fsEntries.push(file);
+                    });
+                    
+                });
+            };
+        };
+
+        var viewModel = new FileBrowserModel();
+        viewModel.loadFileList('');
+        ko.applyBindings(viewModel);
+    </script>
+</body>
+</html>
