@@ -10,6 +10,7 @@ namespace FileBrowser.Models
     public class FSResult
     {
         public string Name { get; set; }
+        public string Path { get; set; }
         public string Created { get; set; }
         public string LastAccessTime { get; set; }
         public string LastWriteTime { get; set; }
@@ -22,7 +23,6 @@ namespace FileBrowser.Models
 
     public class DirectoryResult : FSResult
     {
-
     }
 
     public class ListResult
@@ -37,11 +37,17 @@ namespace FileBrowser.Models
     {
         private static string RootPath = ConfigurationManager.AppSettings["FileSystemRoot"];
 
-        public static ListResult GetFileList(string Path)
+        public static byte[] GetFile(string FilePath)
+        {
+            var filePath = Path.Combine(RootPath, FilePath);
+            return File.ReadAllBytes(filePath);
+        }
+
+        public static ListResult GetFileList(string DirectoryPath)
         {
             var result = new ListResult();
 
-            var listPath = RootPath + Path;
+            var listPath = Path.Combine(RootPath, DirectoryPath ?? string.Empty);
             var directoryInfo = new DirectoryInfo(listPath);
 
             if (directoryInfo.Exists)
@@ -49,6 +55,7 @@ namespace FileBrowser.Models
                 result.Current = new DirectoryResult()
                 {
                     Name = directoryInfo.Name,
+                    Path = directoryInfo.FullName.Replace(RootPath, "/"),
                     Created = directoryInfo.CreationTime.ToString("G"),
                     LastAccessTime = directoryInfo.LastAccessTime.ToString("G"),
                     LastWriteTime = directoryInfo.LastWriteTime.ToString("G")
@@ -59,6 +66,7 @@ namespace FileBrowser.Models
                     result.Directories.Add(new DirectoryResult()
                     {
                         Name = directory.Name,
+                        Path = directory.FullName.Replace(RootPath, "/"),
                         Created = directory.CreationTime.ToString("G"),
                         LastAccessTime = directory.LastAccessTime.ToString("G"),
                         LastWriteTime = directory.LastWriteTime.ToString("G")
@@ -70,6 +78,7 @@ namespace FileBrowser.Models
                     result.Files.Add(new FileResult()
                     {
                         Name = file.Name,
+                        Path = file.FullName.Replace(RootPath, "/"),
                         Created = file.CreationTime.ToString("G"),
                         LastAccessTime = file.LastAccessTime.ToString("G"),
                         LastWriteTime = file.LastWriteTime.ToString("G"),

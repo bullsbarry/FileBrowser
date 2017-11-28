@@ -97,6 +97,8 @@
     <Content Include="css\bootstrap.css" />
     <Content Include="css\bootstrap.min.css" />
     <Content Include="Global.asax" />
+    <Content Include="images\file.png" />
+    <Content Include="images\folder.png" />
     <Content Include="index.html" />
     <Content Include="js\bootstrap.bundle.js" />
     <Content Include="js\bootstrap.bundle.min.js" />
@@ -110,11 +112,13 @@
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\FileController.cs" />
+    <Compile Include="Filters\FileSystemExceptionFilter.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\FileModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Results\FileResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
