@@ -22,9 +22,9 @@ namespace FileBrowser.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("files/{*path}")]
-        public IHttpActionResult List(string path)
+        public IHttpActionResult List(string path, string search = null)
         {
-            return Ok(FileManager.GetFileList(path));
+            return Ok(FileManager.GetFileList(path, search));
         }
 
         [HttpGet]
@@ -32,6 +32,13 @@ namespace FileBrowser.Controllers
         public IHttpActionResult GetFile(string path)
         {
             return new FileBytesResult(Path.GetFileName(path), FileManager.GetFile(path));
+        }
+
+        [HttpPost]
+        [Route("file/{*path}")]
+        public IHttpActionResult PostFile(string path)
+        {
+            throw new NotImplementedException();
         }
     }
 }

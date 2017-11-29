@@ -43,7 +43,7 @@ namespace FileBrowser.Models
             return File.ReadAllBytes(filePath);
         }
 
-        public static ListResult GetFileList(string DirectoryPath)
+        public static ListResult GetFileList(string DirectoryPath, string Search)
         {
             var result = new ListResult();
 
@@ -61,21 +61,25 @@ namespace FileBrowser.Models
                     LastWriteTime = directoryInfo.LastWriteTime.ToString("G")
                 };
 
-                foreach (var directory in directoryInfo.GetDirectories())
-                {
-                    result.Directories.Add(new DirectoryResult()
+                var directories = string.IsNullOrEmpty(Search) ? 
+                    directoryInfo.GetDirectories() : directoryInfo.GetDirectories(Search);
+
+                result.Directories.AddRange(
+                    directories.Select(directory => new DirectoryResult()
                     {
                         Name = directory.Name,
                         Path = directory.FullName.Replace(RootPath, "/"),
                         Created = directory.CreationTime.ToString("G"),
                         LastAccessTime = directory.LastAccessTime.ToString("G"),
                         LastWriteTime = directory.LastWriteTime.ToString("G")
-                    });
-                }
+                    })
+                );
 
-                foreach (var file in directoryInfo.GetFiles())
-                {
-                    result.Files.Add(new FileResult()
+                var files = string.IsNullOrEmpty(Search) ?
+                    directoryInfo.GetFiles() : directoryInfo.GetFiles(Search);
+
+                result.Files.AddRange(
+                    files.Select(file => new FileResult()
                     {
                         Name = file.Name,
                         Path = file.FullName.Replace(RootPath, "/"),
@@ -83,8 +87,8 @@ namespace FileBrowser.Models
                         LastAccessTime = file.LastAccessTime.ToString("G"),
                         LastWriteTime = file.LastWriteTime.ToString("G"),
                         Length = file.Length
-                    });
-                }
+                    })
+                );
             }
 
             return result;
