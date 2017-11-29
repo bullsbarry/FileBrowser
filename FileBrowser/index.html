@@ -24,17 +24,27 @@
 </head>
 <body>
     <div class="loading">Loading...</div>
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
-            <h2><span data-bind="text: currentDirectory().Path"></span> (<span data-bind="text: FolderCount"></span> Folders | <span data-bind="text: FileCount"></span> Files)</h2>
+            <div class="col">
+                <h2><span data-bind="text: currentDirectory().Path"></span> (<span data-bind="text: FolderCount"></span> Folders | <span data-bind="text: FileCount"></span> Files)</h2>
+            </div>
         </div>
-        <div class="row">
-            <div class="col-md">
+        <div class="form-row">
+            <div class="col">
                 <input class="form-control" placeholder="Search" id="searchField" type="text" data-bind="value: search" />
             </div>
             <div class="col">
                 <button class="btn btn-primary" data-bind="click: searchHandler">Search</button>
                 <button class="btn btn-secondary" data-bind="click: clearSearch">Clear</button>
+            </div>
+        </div>
+        <div class="form-row" style="margin-top: 5px;">
+            <div class="col">
+                <input id="fileUpload" class="form-control-file" type="file" />
+            </div>
+            <div class="col">
+                <button class="btn btn-primary" data-bind="click: uploadFile">Upload File</button>
             </div>
         </div>
         <div class="row">
@@ -83,7 +93,7 @@
             $(".loading").hide();
         });
 
-        var service = 'http://localhost:59360/api/v1/';
+        var service = '/api/v1/';
         var path = '';
         if (window.location.hash) {
             path += window.location.hash.substring(1);
@@ -130,6 +140,25 @@
                 self.search("");
                 self.loadFileList(self.currentDirectory().Path, self.search());
             }
+
+            self.uploadFile = function () {
+                var formData = new FormData();
+                var file = $("#fileUpload")[0].files[0];
+                var url = service + 'file' + path + '/' + file.name;
+                formData.append('file', file);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    processData: false,
+                    contentType: false,
+                    data: formData,
+                    success: function () {
+                        $("#fileUpload")[0].value = "";
+                        self.loadFileList(self.currentDirectory().Path, self.search());
+                    }
+                });
+            };
 
             self.createDirectory = function (directory) {
                 return {

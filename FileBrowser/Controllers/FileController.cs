@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace FileBrowser.Controllers
@@ -36,9 +37,17 @@ namespace FileBrowser.Controllers
 
         [HttpPost]
         [Route("file/{*path}")]
-        public IHttpActionResult PostFile(string path)
+        public async Task<IHttpActionResult> PostFile(string path)
         {
-            throw new NotImplementedException();
+            if(!Request.Content.IsMimeMultipartContent())
+            {
+                throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
+            }
+
+            var files = await Request.Content.ReadAsMultipartAsync();
+            var bytes = await files.Contents[0].ReadAsByteArrayAsync();
+            FileManager.AddFile(path, bytes);
+            return Ok();
         }
     }
 }

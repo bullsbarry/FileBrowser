@@ -93,5 +93,16 @@ namespace FileBrowser.Models
 
             return result;
         }
+
+        public static void AddFile(string FilePath, byte[] Contents)
+        {
+            var path = Path.Combine(RootPath, FilePath);
+            if(File.Exists(path))
+            {
+                throw new UnauthorizedAccessException("A file with that name already exists");
+            }
+
+            File.WriteAllBytes(path, Contents);
+        }
     }
 }
