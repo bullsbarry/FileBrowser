@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
     <script type="text/javascript" src="js/knockout-3.4.2.js"></script>
-
+    <link href="css/bootstrap-reboot.min.css" rel="stylesheet" />
     <link href="css/bootstrap.min.css" rel="stylesheet" />
 
     <style>
@@ -17,49 +17,63 @@
             height: 32px;
             width: 32px;
         }
-
-        td {
-            padding: 0 8px 0 8px;
+        table {
+            margin-top: 12px;
         }
     </style>
 </head>
 <body>
     <div class="loading">Loading...</div>
-    <h2><span data-bind="text: currentDirectory().Path"></span> (<span data-bind="text: FolderCount"></span> Folders | <span data-bind="text: FileCount"></span> Files)</h2>
-    <table>
-        <thead>
-            <tr>
-                <td></td>
-                <td>Name</td>
-                <td>Created</td>
-                <td>Modified</td>
-                <td>Size</td>
-            </tr>
-        </thead>
-        <tbody data-bind="foreach: fsEntries">
-            <tr>
-                <td>
-                    <!-- ko if: Directory -->
-                    <img src="images/folder.png" class="icon" />
-                    <!-- /ko -->
-                    <!-- ko ifnot: Directory -->
-                    <img src="images/file.png" class="icon"/>
-                    <!-- /ko -->
-                </td>
-                <td>
-                    <!-- ko if: Directory -->
-                    <a data-bind="text: Name, attr: { href: Href }"></a>
-                    <!-- /ko -->
-                    <!-- ko ifnot: Directory -->
-                    <a target="_blank" data-bind="text: Name, attr: { href: Href }"></a>
-                    <!-- /ko -->
-                </td>
-                <td data-bind="text: Created"></td>
-                <td data-bind="text: LastWriteTime"></td>
-                <td data-bind="text: Length"></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="container">
+        <div class="row">
+            <h2><span data-bind="text: currentDirectory().Path"></span> (<span data-bind="text: FolderCount"></span> Folders | <span data-bind="text: FileCount"></span> Files)</h2>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <input class="form-control" placeholder="Search" id="searchField" type="text" data-bind="value: search" />
+            </div>
+            <div class="col">
+                <button class="btn btn-primary" data-bind="click: searchHandler">Search</button>
+                <button class="btn btn-secondary" data-bind="click: clearSearch">Clear</button>
+            </div>
+        </div>
+        <div class="row">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td>Name</td>
+                        <td>Created</td>
+                        <td>Modified</td>
+                        <td>Size</td>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: fsEntries">
+                    <tr>
+                        <td>
+                            <!-- ko if: Directory -->
+                            <img src="images/folder.png" class="icon" />
+                            <!-- /ko -->
+                            <!-- ko ifnot: Directory -->
+                            <img src="images/file.png" class="icon" />
+                            <!-- /ko -->
+                        </td>
+                        <td>
+                            <!-- ko if: Directory -->
+                            <a data-bind="text: DisplayName, attr: { href: Href }"></a>
+                            <!-- /ko -->
+                            <!-- ko ifnot: Directory -->
+                            <a target="_blank" data-bind="text: DisplayName, attr: { href: Href }"></a>
+                            <!-- /ko -->
+                        </td>
+                        <td data-bind="text: Created"></td>
+                        <td data-bind="text: LastWriteTime"></td>
+                        <td data-bind="text: Length"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <script>
         $(".loading").hide();
@@ -82,6 +96,7 @@
             var self = this;
             self.currentDirectory = ko.observable({ Name: "" });
             self.fsEntries = ko.observableArray();
+            self.search = ko.observable("");
 
             self.FileCount = ko.computed(function () {
                 return self.fsEntries().filter(function (x) { return !x.Directory }).length;
@@ -91,8 +106,8 @@
                 return self.fsEntries().filter(function (x) { return x.Directory }).length;
             });
 
-            self.loadFileList = function (path) {
-                $.getJSON(service + 'files' + path, function (data) {
+            self.loadFileList = function (path, search) {
+                $.getJSON(service + 'files' + path + '?search=' + search, function (data) {
                     self.fsEntries.removeAll();
                     self.currentDirectory(data.Current);
 
@@ -107,8 +122,18 @@
                 });
             };
 
+            self.searchHandler = function () {
+                self.loadFileList(self.currentDirectory().Path, self.search());
+            };
+
+            self.clearSearch = function () {
+                self.search("");
+                self.loadFileList(self.currentDirectory().Path, self.search());
+            }
+
             self.createDirectory = function (directory) {
                 return {
+                    DisplayName: self.search().length > 0 ? directory.Path : directory.Name,
                     Name: directory.Name,
                     Path: directory.Path,
                     Created: directory.Created, 
@@ -121,6 +146,7 @@
 
             self.createFile = function (file) {
                 return {
+                    DisplayName: self.search().length > 0 ? file.Path : file.Name,
                     Name: file.Name,
                     Path: file.Path,
                     Created: file.Created,
@@ -133,11 +159,12 @@
         };
 
         var viewModel = new FileBrowserModel();
-        viewModel.loadFileList(path);
+        viewModel.loadFileList(path, '');
         ko.applyBindings(viewModel);
 
         $(window).bind('hashchange', function () {
-            viewModel.loadFileList(window.location.hash.substring(1));
+            viewModel.search("");
+            viewModel.loadFileList(window.location.hash.substring(1), "");
         });
     </script>
 </body>
